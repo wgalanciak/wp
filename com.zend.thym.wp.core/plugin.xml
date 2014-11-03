@@ -8,8 +8,8 @@
             libraryResolver="com.zend.thym.wp.core.WPLibraryResolver"
             platform="Windows Phone (Visual Studio)"
             platformID="wp8"
-            pluginInstallActionFactory="com.zend.thym.wp.core.vstudio.WPPluginInstallationActionsFactory"
-            projectGenerator="com.zend.thym.wp.internal.core.vstudio.WindowsPhoneProjectGenerator">
+            pluginInstallActionFactory="com.zend.thym.wp.internal.core.vstudio.WPPluginInstallationActionsFactory"
+            projectGenerator="com.zend.thym.wp.internal.core.vstudio.WPProjectGenerator">
       </platform>
    </extension>
    <extension

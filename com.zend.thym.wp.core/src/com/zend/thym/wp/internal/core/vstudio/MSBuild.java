@@ -2,8 +2,8 @@ package com.zend.thym.wp.internal.core.vstudio;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FilenameFilter;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -29,17 +29,6 @@ public class MSBuild extends AbstractNativeBinaryBuildDelegate {
 	private static final String DOT_NET = ".NETFramework"; //$NON-NLS-1$
 	private static final String MICROSOFT_KEY = "Microsoft"; //$NON-NLS-1$
 	private static final String SOFTWARE_KEY = "SOFTWARE"; //$NON-NLS-1$
-
-	/**
-	 * Returns the actual folder where the build artifacts can be found.
-	 * 
-	 * @param vstudioProjectFolder
-	 *            - Visual Studio project's root folder
-	 * @return folder with the build artifacts
-	 */
-	public static File getBuildDir(File vstudioProjectFolder) {
-		return new File(vstudioProjectFolder, "Bin/Debug");
-	}
 
 	private ILaunchConfiguration launchConfiguration;
 
@@ -81,8 +70,13 @@ public class MSBuild extends AbstractNativeBinaryBuildDelegate {
 						"Not a hybrid mobile project, can not generate files"));
 			}
 			String name = hybridProject.getBuildArtifactAppName();
-			setBuildArtifact(new File(getBuildDir(vstudioProjectDir), name
-					+ ".app"));
+			if (isRelease()) {
+				setBuildArtifact(new File(getBuildDir(vstudioProjectDir),
+						"CordovaAppProj_Release_AnyCPU.xap"));
+			} else {
+				setBuildArtifact(new File(getBuildDir(vstudioProjectDir),
+						"CordovaAppProj_Debug_AnyCPU.xap"));
+			}
 		} finally {
 			monitor.done();
 		}
@@ -96,6 +90,19 @@ public class MSBuild extends AbstractNativeBinaryBuildDelegate {
 		return launchConfiguration;
 	}
 
+	/**
+	 * Returns the actual folder where the build artifacts can be found.
+	 * 
+	 * @param vstudioProjectFolder
+	 *            - Visual Studio project's root folder
+	 * @return folder with the build artifacts
+	 */
+	private File getBuildDir(File vstudioProjectFolder) {
+		File binFolder = new File(vstudioProjectFolder, WPProjectUtils.BIN);
+		return new File(binFolder, isRelease() ? WPProjectUtils.RELEASE
+				: WPProjectUtils.DEBUG);
+	}
+
 	private void doBuildProject(File projectLocation, IProgressMonitor monitor)
 			throws CoreException {
 		if (monitor.isCanceled()) {
@@ -105,19 +112,16 @@ public class MSBuild extends AbstractNativeBinaryBuildDelegate {
 			monitor.beginTask("Build Cordova project for Windows Phone 8", 10);
 			String msBuild = getMSBuildPath();
 			if (msBuild != null) {
-				File[] csprojFiles = projectLocation
-						.listFiles(new FilenameFilter() {
-
-							@Override
-							public boolean accept(File dir, String name) {
-								return name
-										.endsWith(WPProjectUtils.CSPROJ_EXTENSION);
-							}
-						});
-
+				File csprojFile = WPProjectUtils.getCsrojFile(projectLocation);
+				// on this stage it cannot be null
+				Assert.isNotNull(csprojFile);
 				StringBuilder cmdString = new StringBuilder(msBuild);
 				cmdString.append(" ");
-				cmdString.append(csprojFiles[0].getAbsolutePath());
+				if (isRelease()) {
+					cmdString.append("/p:Configuration=Release");
+					cmdString.append(" ");
+				}
+				cmdString.append(csprojFile.getAbsolutePath());
 
 				ExternalProcessUtility processUtility = new ExternalProcessUtility();
 				if (monitor.isCanceled()) {

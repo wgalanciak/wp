@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -26,9 +27,12 @@ import org.eclipse.thym.core.platform.PlatformConstants;
 
 import com.zend.thym.wp.core.WPCore;
 import com.zend.thym.wp.core.WPLibraryResolver;
-import com.zend.thym.wp.internal.core.vstudio.WPProjectUtils;
 
 public class WPProjectGenerator extends AbstractProjectGeneratorDelegate {
+
+	public WPProjectGenerator() {
+		super();
+	}
 
 	public WPProjectGenerator(IProject project, File generationFolder,
 			String platform) {
@@ -73,10 +77,9 @@ public class WPProjectGenerator extends AbstractProjectGeneratorDelegate {
 							.toFile()));
 
 			// copy config.xml to /${project_name}/config.xml
+			File configFile = getConfigFile(hybridProject.getProject());
 			fileCopy(
-					toURL(hybridProject.getProject()
-							.getFile(PlatformConstants.FILE_XML_CONFIG)
-							.getLocation().toFile()),
+					toURL(configFile),
 					toURL(destinationPath.append(
 							PlatformConstants.FILE_XML_CONFIG).toFile()));
 
@@ -148,6 +151,12 @@ public class WPProjectGenerator extends AbstractProjectGeneratorDelegate {
 			}
 
 			org.apache.commons.io.FileUtils.deleteQuietly(new File(
+					destinationDir, "Bin"));
+
+			org.apache.commons.io.FileUtils.deleteQuietly(new File(
+					destinationDir, "obj"));
+
+			org.apache.commons.io.FileUtils.deleteQuietly(new File(
 					destinationDir, "__PreviewImage.jpg"));
 
 			org.apache.commons.io.FileUtils.deleteQuietly(new File(
@@ -164,15 +173,24 @@ public class WPProjectGenerator extends AbstractProjectGeneratorDelegate {
 	@Override
 	protected void replaceCordovaPlatformFiles(
 			HybridMobileLibraryResolver resolver) throws IOException {
-		//fileCopy(
-		//		resolver.getTemplateFile(HybridMobileLibraryResolver.PATH_CORDOVA_JS),
-		//		toURL(new File(getPlatformWWWDirectory(),
-		//				PlatformConstants.FILE_JS_CORDOVA)));
+		// fileCopy(
+		// resolver.getTemplateFile(HybridMobileLibraryResolver.PATH_CORDOVA_JS),
+		// toURL(new File(getPlatformWWWDirectory(),
+		// PlatformConstants.FILE_JS_CORDOVA)));
 	}
 
 	@Override
 	protected File getPlatformWWWDirectory() {
 		return WPProjectUtils.getPlatformWWWDirectory(getDestination());
+	}
+
+	private File getConfigFile(IProject project) {
+		IFile configFile = project.getFile(new Path(PlatformConstants.DIR_WWW)
+				.append(PlatformConstants.FILE_XML_CONFIG));
+		if (!configFile.exists()) {
+			configFile = project.getFile(PlatformConstants.FILE_XML_CONFIG);
+		}
+		return configFile.getLocation().toFile();
 	}
 
 }

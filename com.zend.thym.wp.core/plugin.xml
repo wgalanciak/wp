@@ -15,7 +15,7 @@
    <extension
          point="org.eclipse.thym.core.projectBuilder">
       <builder
-            delegate="com.zend.thym.wp.internal.core.vstudio.MSBuild"
+            delegate="com.zend.thym.wp.core.vstudio.MSBuild"
             id="com.zend.thym.wp.core.projectBuilder"
             platform="com.zend.thym.wp.core.platformSupport">
       </builder>

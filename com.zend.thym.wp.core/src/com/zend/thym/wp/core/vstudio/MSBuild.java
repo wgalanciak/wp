@@ -1,4 +1,4 @@
-package com.zend.thym.wp.internal.core.vstudio;
+package com.zend.thym.wp.core.vstudio;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -21,6 +21,8 @@ import com.ice.jni.registry.RegistryException;
 import com.ice.jni.registry.RegistryKey;
 import com.zend.thym.wp.core.WPCore;
 import com.zend.thym.wp.internal.core.Version;
+import com.zend.thym.wp.internal.core.vstudio.WPProjectGenerator;
+import com.zend.thym.wp.internal.core.vstudio.WPProjectUtils;
 
 public class MSBuild extends AbstractNativeBinaryBuildDelegate {
 
@@ -91,6 +93,47 @@ public class MSBuild extends AbstractNativeBinaryBuildDelegate {
 	}
 
 	/**
+	 * Get absolute path to MSBuild executable. It is detected base on Windows
+	 * Registry.
+	 * 
+	 * @return path to MSBuild executable
+	 */
+	public String getMSBuildPath() {
+		String installationRoot = getInstallationRoot();
+		if (installationRoot != null) {
+			File installationFile = new File(installationRoot);
+			if (installationFile.exists()) {
+				File[] versionFiles = installationFile
+						.listFiles(new FileFilter() {
+
+							@Override
+							public boolean accept(File pathname) {
+								return pathname.getName().startsWith("v");
+							}
+						});
+				File highestVersion = null;
+				for (File file : versionFiles) {
+					if (highestVersion == null) {
+						highestVersion = file;
+					} else {
+						Version current = Version.byName(highestVersion
+								.getName());
+						Version newOne = Version.byName(file.getName());
+						if (newOne.compareTo(current) > 0) {
+							highestVersion = file;
+						}
+					}
+				}
+				if (highestVersion != null) {
+					return new File(highestVersion.getAbsolutePath(),
+							"MSBuild.exe").getAbsolutePath();
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Returns the actual folder where the build artifacts can be found.
 	 * 
 	 * @param vstudioProjectFolder
@@ -141,41 +184,6 @@ public class MSBuild extends AbstractNativeBinaryBuildDelegate {
 		} finally {
 			monitor.done();
 		}
-	}
-
-	private String getMSBuildPath() {
-		String installationRoot = getInstallationRoot();
-		if (installationRoot != null) {
-			File installationFile = new File(installationRoot);
-			if (installationFile.exists()) {
-				File[] versionFiles = installationFile
-						.listFiles(new FileFilter() {
-
-							@Override
-							public boolean accept(File pathname) {
-								return pathname.getName().startsWith("v");
-							}
-						});
-				File highestVersion = null;
-				for (File file : versionFiles) {
-					if (highestVersion == null) {
-						highestVersion = file;
-					} else {
-						Version current = Version.byName(highestVersion
-								.getName());
-						Version newOne = Version.byName(file.getName());
-						if (newOne.compareTo(current) > 0) {
-							highestVersion = file;
-						}
-					}
-				}
-				if (highestVersion != null) {
-					return new File(highestVersion.getAbsolutePath(),
-							"MSBuild.exe").getAbsolutePath();
-				}
-			}
-		}
-		return null;
 	}
 
 	private String getInstallationRoot() {

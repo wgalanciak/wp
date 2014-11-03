@@ -11,7 +11,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate2;
 import org.eclipse.thym.core.HybridProjectLaunchConfigConstants;
 
-import com.zend.thym.wp.internal.core.vstudio.MSBuild;
+import com.zend.thym.wp.core.vstudio.MSBuild;
 
 
 public class WPLaunchDelegate implements ILaunchConfigurationDelegate2 {

@@ -10,7 +10,6 @@ public class WPLaunchConfigurationTabGroup extends
 		// TODO Auto-generated constructor stub
 	}
 
-	@Override
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		// TODO Auto-generated method stub
 

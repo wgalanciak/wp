@@ -8,6 +8,7 @@ import org.eclipse.thym.core.platform.PlatformConstants;
 import org.eclipse.thym.core.plugin.actions.CopyFileAction;
 import org.eclipse.thym.core.plugin.actions.CreateFileAction;
 import org.eclipse.thym.core.plugin.actions.JSModuleAction;
+import org.eclipse.thym.core.plugin.actions.XMLConfigFileAction;
 
 public class WPPluginInstallationActionsFactory extends
 		AbstractPluginInstallationActionsFactory {
@@ -52,8 +53,8 @@ public class WPPluginInstallationActionsFactory extends
 	@Override
 	public IPluginInstallationAction getConfigFileAction(String target,
 			String parent, String value) {
-		// TODO Auto-generated method stub
-		return null;
+		File targetFile = new File(getProjectDirectory(), target);
+		return new XMLConfigFileAction(targetFile, parent, value);
 	}
 
 	@Override
